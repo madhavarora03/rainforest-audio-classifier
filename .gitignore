@@ -3,3 +3,9 @@
 .ipynb_checkpoints/
 __pycache__/
 *.pth
+.venv/
+*/data/**/*
+!data/.gitkeep
+.idea/
+model_training_history.json
+*.tflite

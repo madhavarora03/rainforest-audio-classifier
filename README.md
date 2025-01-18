@@ -29,7 +29,7 @@ The dataset comprises a large collection of short audio clips capturing sounds o
 
 The data is publicly available on the [Hugging Face Datasets Repository](https://huggingface.co/datasets/rfcx/frugalai) as part of the [FrugalAI Challenge](https://frugalaichallenge.org/).
 
-### Sample Audio Files
+### Sample Audio Files (converted to mp3 for multi-platform audioplay support)
 
 #### Environment:
 
@@ -44,3 +44,77 @@ The data is publicly available on the [Hugging Face Datasets Repository](https:/
   <source type="audio/mp3" src="assets/chainsaw.mp3"></source>
   <p>Your browser does not support the audio element. <a href="assets/chainsaw.mp3" target="_blank">View in new tab.</a></p>
 </audio>
+
+## Setup and Model Training Instructions
+
+### 1. Setting Up the Environment
+
+First, ensure you have Python 3.10+ installed. Then, create a virtual environment and activate it:
+
+```bash
+cd training
+python3 -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+```
+
+### 2. Installing Dependencies
+
+Install the required Python packages using `pip`:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Preparing the Dataset
+
+Download and clean up the dataset from the [Hugging Face Datasets Repository](https://huggingface.co/datasets/rfcx/frugalai) by running the `data_prep.py` script:
+
+```bash
+python data_prep.py
+```
+
+### 4. Training the Model
+
+Run the training script to train the model on the dataset:
+
+```bash
+python train.py
+```
+
+This will save the trained model in the `checkpoints` directory.
+
+### 5. Convert PyTorch model to TFLite
+
+Convert the trained PyTorch model to TFLite format using the provided script:
+
+```bash
+python pytorch_to_tflite.py
+```
+
+This script will:
+
+1. Load the PyTorch model from checkpoints
+2. Convert it to ONNX format
+3. Transform it to TensorFlow
+4. Export the final TFLite model to `M5_model.tflite`
+
+### 6. Converting the Model for ESP32
+
+Convert the trained model to a C array format suitable for the ESP32 firmware. You can use the `xxd` tool for this:
+
+```bash
+xxd -i M5_model.tflite > model.cc
+```
+
+### 7. Integrating the Model with Firmware
+
+Replace the existing model array in the firmware with the newly generated model array. Open the `firmware/src/model.cc` file and replace its contents with the contents of `model_output/model.cc`.
+
+### 8. Flashing the Firmware
+
+Finally, compile and flash the firmware to your ESP32 device using platformio.
+Ensure your ESP32 is connected to your computer and in flashing mode.
+
+### 9. Testing the Deployment
+
+After flashing, reset your ESP32 and monitor the serial output to verify that the model is running correctly and classifying audio inputs as expected.
